@@ -1,0 +1,681 @@
+﻿#include <stdarg.h>
+#include <math.h>
+#include <algorithm>    
+#include <vector>
+#include <string>
+
+static bool _is_optimizing = true;
+
+inline void printft(int count, const char* format, ... )
+{
+	for( int i = 0; i < count; i++ ) {
+		printf("\t");
+	}
+	
+    va_list args;
+    va_start( args, format );
+    vfprintf( stdout, format, args );
+    va_end( args );	
+}
+
+struct Exp
+{
+	bool canOptimize;
+	
+	Exp() { canOptimize = _is_optimizing; }
+	virtual void eval(int indent) = 0;
+	virtual Exp* optimize() = 0;
+};
+
+struct IdentExpr : Exp
+{
+	std::wstring value;
+
+	virtual void eval(int indent) 
+	{
+		printft(indent, "Field \"%ls\"\r\n", value.c_str());
+	}
+	
+	virtual Exp* optimize() 
+	{
+		return 0;
+	}
+};
+
+struct LiteralExpr : Exp
+{
+	float literal;
+
+	virtual void eval(int indent) 
+	{
+		printft(indent, "%fF\r\n", literal);
+	}
+	
+	virtual Exp* optimize() 
+	{
+		return 0;
+	}	
+};
+
+struct Condition : Exp
+{
+	Exp* booleanExpression;
+	Exp* blockExpression;
+	
+	virtual void eval(int indent) 
+	{
+		printft(indent, "conditional\r\n");
+		booleanExpression->eval(indent + 1);
+		blockExpression->eval(indent + 1);
+	}
+	
+	virtual Exp* optimize() 
+	{			
+		Exp* p = booleanExpression->optimize();
+		if( p ) 
+		{
+			Exp* old = booleanExpression;
+			booleanExpression = p;
+			delete old;
+		}		
+		
+		p = blockExpression->optimize();
+		if( p ) 
+		{
+			Exp* old = blockExpression;
+			blockExpression = p;
+			delete old;
+		}		
+		
+		return 0;
+	}
+};
+
+struct BlockExpr : Exp
+{
+	std::vector<Exp*> statements;
+	
+	virtual void eval(int indent) 
+	{
+		printft(indent, "block\r\n");
+		for( int i = 0; i < statements.size(); ++i ) {
+			statements[i]->eval(indent + 1);
+		}	
+	}
+	
+	virtual Exp* optimize() 
+	{	
+		for( int i = 0; i < statements.size(); ++i ) 
+		{					
+			Exp* p = statements[i]->optimize();
+			if( p ) 
+			{
+				Exp* old = statements[i];
+				statements[i] = p;
+				delete old;
+			}			
+		}	
+		
+		return 0;
+	}
+};
+
+struct CallExpr : Exp
+{	
+	std::wstring functionName;
+	std::vector<Exp*> arguments;
+	
+	virtual void eval(int indent) 
+	{
+		printft(indent, "call method %ls %d\r\n", functionName.c_str(), 
+			arguments.size());
+		for( int i = 0; i < arguments.size(); ++i ) {
+			arguments[i]->eval(indent + 1);
+		}
+	}
+	
+	virtual Exp* optimize() 
+	{
+		for( int i = 0; i < arguments.size(); ++i ) {					
+			Exp* p = arguments[i]->optimize();
+			if( p ) 
+			{
+				Exp* old = arguments[i];
+				arguments[i] = p;
+				delete old;
+			}			
+		}	
+		
+		if( functionName == L"sin" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = sin(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}
+
+		if( functionName == L"cos" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = cos(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}		
+		
+		return 0;
+	}
+};
+
+
+struct ComparisonExp : Exp
+{	
+	int  op;
+	Exp* a;
+	Exp* b;
+	
+	ComparisonExp() : op(0)
+	{
+	}
+
+	virtual void eval(int indent) 
+	{
+		switch( op )
+		{
+			case 0: printft(indent, "??\r\n"); break;
+			case 1: printft(indent, "==\r\n"); break;
+			case 2: printft(indent, "!=\r\n"); break;									
+			case 3: printft(indent, "<=\r\n"); break;
+			case 4: printft(indent, ">=\r\n"); break;
+			case 5: printft(indent, "<\r\n"); break;
+			case 6: printft(indent, ">\r\n"); break;
+		}
+				
+		a->eval(indent + 1);
+		b->eval(indent + 1);			
+	}
+
+	virtual Exp* optimize() 
+	{	
+		Exp* a1 = a->optimize();
+		if( a1 ) 
+		{
+			Exp* old = a;
+			a = a1;
+			delete old;
+		}
+		
+		Exp* b1 = b->optimize();
+		if( b1 ) 
+		{
+			Exp* old = b;
+			b = b1;
+			delete old;
+		}			
+		
+		return 0;	
+	}
+};
+
+
+struct ArthimeticExp : Exp
+{	
+	int  op;
+	Exp* a;
+	Exp* b;
+	
+	ArthimeticExp() : op(0)
+	{
+	}
+
+	virtual void eval(int indent) 
+	{
+		switch( op )
+		{
+			case 0: printft(indent, "??\r\n"); break;
+			case 1: printft(indent, "+\r\n"); break;
+			case 2: printft(indent, "-\r\n"); break;
+									
+			case 3: printft(indent, "*\r\n"); break;
+			case 4: printft(indent, "/\r\n"); break;
+			case 5: printft(indent, "%%\r\n"); break;
+		}
+				
+		a->eval(indent + 1);
+		b->eval(indent + 1);			
+	}
+
+	virtual Exp* optimize() 
+	{
+		Exp* a1 = a->optimize();
+		if( a1 ) 
+		{
+			Exp* old = a;
+			a = a1;
+			delete old;
+		}
+		
+		Exp* b1 = b->optimize();
+		if( b1 ) 
+		{
+			Exp* old = b;
+			b = b1;
+			delete old;
+		}
+		
+		if( op == 1 && canOptimize == true )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(a);
+			LiteralExpr* literal_b = dynamic_cast<LiteralExpr*>(b);
+			if( literal_a && literal_b ) 
+			{
+				float result = literal_a->literal + literal_b->literal;																
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;
+			}								
+		}	
+		
+		else if( op == 2 && canOptimize == true )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(a);
+			LiteralExpr* literal_b = dynamic_cast<LiteralExpr*>(b);
+			if( literal_a && literal_b ) 
+			{
+				float result = literal_a->literal - literal_b->literal;																
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;
+			}								
+		}	
+		
+		else if( op == 3 && canOptimize == true )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(a);
+			LiteralExpr* literal_b = dynamic_cast<LiteralExpr*>(b);
+			if( literal_a && literal_b ) 
+			{
+				float result = literal_a->literal * literal_b->literal;																
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;
+			}								
+		}				
+		
+		else if( op == 4 && canOptimize == true )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(a);
+			LiteralExpr* literal_b = dynamic_cast<LiteralExpr*>(b);
+			if( literal_a && literal_b ) 
+			{
+				float result = literal_a->literal / literal_b->literal;																
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;
+			}								
+		}	
+		
+		else if( op == 5 && canOptimize == true )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(a);
+			LiteralExpr* literal_b = dynamic_cast<LiteralExpr*>(b);
+			if( literal_a && literal_b ) 
+			{
+				float result = fmodf( literal_a->literal, literal_b->literal );
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;
+			}								
+		}				
+		
+		return 0;	
+	}
+};
+
+
+struct AndExpr : Exp
+{
+	Exp* a;
+	Exp* b;
+
+	virtual void eval(int indent) 
+	{
+		printft(indent, "&&\r\n");		
+		a->eval(indent + 1);
+		b->eval(indent + 1);
+	}
+	
+	virtual Exp* optimize() 
+	{
+		Exp* a1 = a->optimize();
+		if( a1 ) 
+		{
+			Exp* old = a;
+			a = a1;
+			delete old;
+		}
+		
+		Exp* b1 = b->optimize();
+		if( b1 ) 
+		{
+			Exp* old = b;
+			b = b1;
+			delete old;
+		}
+		return 0;
+	}
+};
+
+struct OrExpr : Exp
+{
+	Exp* a;
+	Exp* b;
+
+	virtual void eval(int indent) 
+	{
+		printft(indent, "||\r\n");		
+		a->eval(indent + 1);
+		b->eval(indent + 1);
+	}
+	
+	virtual Exp* optimize() 
+	{
+		Exp* a1 = a->optimize();
+		if( a1 ) 
+		{
+			Exp* old = a;
+			a = a1;
+			delete old;
+		}
+		
+		Exp* b1 = b->optimize();
+		if( b1 ) 
+		{
+			Exp* old = b;
+			b = b1;
+			delete old;
+		}
+		return false;
+	}
+};
+
+struct AssignExpr : Exp
+{
+	std::wstring value;
+	Exp*		 exp;
+
+	virtual void eval(int indent) 
+	{
+		printft(indent, "assign to %ls\r\n", value.c_str(), exp );
+		exp->eval(indent + 1);
+	}
+	
+	virtual Exp* optimize() 
+	{
+		Exp* p = exp->optimize();
+		if( p ) 
+		{
+			Exp* old = exp;
+			exp = p;
+			delete old;
+		}
+		
+		return 0;
+	}
+};
+
+struct NullExpr : Exp
+{
+	virtual void eval(int indent) 
+	{
+		printft(indent, "null\r\n");
+	}
+	
+	virtual Exp* optimize() 
+	{
+		return 0;
+	}
+};
+
+COMPILER C
+ 
+Exp*	results; 
+ 
+bool IsMethodCall()
+{
+	Token* pt = la;	
+	if( pt->kind == _ident )
+	{			
+		while( pt->kind == _ident || pt->kind == _dot ) {
+			pt = scanner->Peek();
+		}
+		
+		if( pt->kind == _LeftParenthesis )
+		{
+			scanner->ResetPeek();
+			return true;
+		}
+		else
+		{	
+			scanner->ResetPeek();
+			return false;
+		}
+	}
+	else
+	{
+		scanner->ResetPeek();	
+		return false;
+	}
+}
+
+bool IsAssignment()
+{	
+	Token* pt = la;	
+	if( pt->kind == _ident )
+	{			
+		while( pt->kind == _ident || pt->kind == _dot ) {
+			pt = scanner->Peek();
+		}
+		
+		if( pt->kind == _assignment )
+		{
+			scanner->ResetPeek();
+			return true;
+		}
+		else
+		{	
+			scanner->ResetPeek();
+			return false;
+		}
+	}
+	else
+	{
+		scanner->ResetPeek();	
+		return false;
+	}
+}
+ 
+ 
+CHARACTERS
+  letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".
+  digit = "0123456789".
+  cr  = '\r'.
+  lf  = '\n'.
+  tab = '\t'.
+  ws  = " " + tab + '\u000b' + '\u000c'.  
+  newLine    = cr + lf.
+  notNewLine = ANY - newLine .  
+  
+TOKENS
+  ident  = letter {letter | digit}.
+  number = digit {digit}.
+  realCon =
+    "." digit {digit} 
+    [("e" | "E") ["+" | "-"] digit {digit}] 
+    ["F" | "f" | "D" | "d" | "M" | "m"]
+  | digit {digit} 
+    ( "." digit {digit} 
+      [("e" | "E" ) ["+" | "-"] digit {digit} ] 
+      ["F" | "f" | "D" | "d" | "M" | "m"]
+    | ("e" | "E") ["+" | "-"] digit {digit}
+      ["F" | "f" | "D" | "d" | "M" | "m"]
+    | "F" | "f" | "D" | "d" | "M" | "m"
+    ).  
+  
+  LeftParenthesis = "(".
+  RightParenthesis = ")".  
+  assignment = "=".
+  dot = "." .
+  
+PRAGMAS  
+  ppOptimize  = '#' {ws} "optimize" ["off" | "on"] {notNewLine} newLine 
+  .    
+  (. 	 	  
+  	  std::wstring pragma = la->val;
+  	  pragma.erase( std::remove_if( pragma.begin(), pragma.end(), ::isspace ), pragma.end() );
+  	  
+	  if( wcscmp(L"#optimizeoff", pragma.c_str()) == 0 )
+	  {
+		  _is_optimizing = false;
+	  }
+	  else if( wcscmp(L"#optimizeon", pragma.c_str()) == 0 )
+	  {
+		  _is_optimizing = true;
+	  }  
+  .)
+
+COMMENTS FROM "/*" TO "*/" NESTED
+COMMENTS FROM "//" TO cr lf
+
+IGNORE cr + lf + tab
+
+PRODUCTIONS
+
+C =		(. _is_optimizing = true; .)
+		"void" ident LeftParenthesis RightParenthesis 
+		(. Exp* e = 0; .) Block<e> (. e->optimize(); results = e; .)
+	.
+
+Primary<Exp*& expression>	  = 
+			(. LiteralExpr* expr = new LiteralExpr(); expression = expr; bool wasNegative = false; .) 
+			( ['-' (. wasNegative = true; .)] ( realCon | number ) )
+			(. expr->literal = wasNegative ? -_wtof(t->val) :  _wtof(t->val) ; .)
+		   .
+
+Expr<Exp*& expression>
+		   =  (. Exp* expr = 0; .) LogOrExpr<expr> (. expression = expr; .)
+		   .
+		   		   
+LogOrExpr<Exp*& expression> 
+		   = (. Exp* expr = 0; .) LogAndExpr<expr> 
+			 { 
+				"||" 
+				(. OrExpr* orExpression = new OrExpr(); orExpression->a = expr; expr = 0;  .) 
+				LogAndExpr<expr> (. orExpression->b = expr; expr = orExpression; .) 
+			 } 			 
+			 (. expression = expr; .)
+		   .		   
+		   
+LogAndExpr<Exp*& expression> 
+		   = (. Exp* expr = 0; .) CompExpr<expr>  
+			 {
+				"&&"
+				(. AndExpr* orExpression = new AndExpr(); orExpression->a = expr; expr = 0;  .) 
+				CompExpr<expr> (. orExpression->b = expr; expr = orExpression; .) 
+			 } 
+			 (. expression = expr; .)
+		   .
+		   
+CompExpr<Exp*& expression>    
+		   = (. Exp* expr = 0; .) MultExpr<expr> 
+			 {
+				(. int op = 0; .)
+				("==" (. op = 1; .) | "!=" (. op = 2; .) | "<=" (. op = 3; .) | ">=" (. op = 4; .) | "<" (. op = 5; .) | ">" (. op = 6; .) ) 
+				(. ComparisonExp* orExpression = new ComparisonExp(); orExpression->op = op; orExpression->a = expr; expr = 0;  .) 
+				MultExpr<expr> (. orExpression->b = expr; expr = orExpression; .) 
+			 }
+			 (. expression = expr; .)
+		   .
+					 
+MultExpr<Exp*& expression>   
+		  =  (. Exp* expr = 0; .) AddExpr<expr> 
+			 {
+				(. int op = 0; .)
+				('*' (. op = 3; .) | '/' (. op = 4; .) | '%' (. op = 5; .) ) 
+				(. ArthimeticExp* orExpression = new ArthimeticExp(); orExpression->a = expr; orExpression->op = op; expr = 0;  .) 				
+				AddExpr<expr>
+				(. orExpression->b = expr; expr = orExpression; .) 
+			 }
+			 (. expression = expr; .)
+		  .
+		  
+AddExpr<Exp*& expression> 
+		  =  (. Exp* expr = 0; .) UnaryExpr<expr>
+		     {
+		        ('+' | '-') (. int op = *t->val == '+' ? 1 : 2; .)
+		        (. ArthimeticExp* orExpression = new ArthimeticExp(); orExpression->a = expr; orExpression->op = op; expr = 0;  .) 
+		        UnaryExpr<expr> (. orExpression->b = expr; expr = orExpression; .) 
+		     }		     		     
+		     (. expression = expr; .)
+		  .		  
+		  
+		  
+UnaryExpr<Exp*& expression>   =				
+				 Primary<expression> 
+		    | 				 
+				'(' (. Exp* e = 0; .) [Expr<e> (. expression = e; .)] ')'
+			|
+				 IF(IsMethodCall()) (. Exp* e = 0; .) 
+				 Call<e> (. expression = e; .)			
+			| 
+			     (. IdentExpr* expr = new IdentExpr(); expression = expr; .) 
+				 ident (. expr->value += t->val; .) { "." (. expr->value += t->val; .) ident (. expr->value += t->val; .) } 
+			.
+
+
+Block<Exp*& expression>  = (. BlockExpr* expr = new BlockExpr(); .) 
+			"{" {Statement<expr>} "}" 
+			(. expression = expr; .) 
+		  . 
+
+Arglist<CallExpr* expression> = (. Exp* e = 0; .) Expr<e> (. expression->arguments.push_back(e); e = 0; .)
+								{ "," Expr<e> (. expression->arguments.push_back(e); e = 0; .) } .
+
+Call<Exp*& expression>  =	(. CallExpr* exp = new CallExpr(); .)
+							ident (. exp->functionName = t->val; .)  { "." ident } 
+							LeftParenthesis [Arglist<exp>] RightParenthesis 						
+							(. expression = exp; .)
+						.
+
+Assignment<Exp*& expression> =  
+			  (. AssignExpr* assign = new AssignExpr(); .)
+		      ident (. assign->value += t->val; .) { "." (. assign->value += t->val; .) ident (. assign->value += t->val; .) } 
+		      '=' (. Exp* e = 0; .) Expr<e> (. assign->exp = e; expression = assign; .)
+		   .		    
+
+EmbeddedStatement<Exp*& expression> = SYNC 
+		( (. expression = 0; .) Call<expression> SYNC )		    
+		  .
+
+Statement<BlockExpr* expression> =	';'
+		  |  (. Condition* cond = new Condition(); Exp *e = 0, *b = 0; .) "if" LeftParenthesis [Expr<e>] RightParenthesis Block<b> (. cond->booleanExpression = e; cond->blockExpression = b; expression->statements.push_back( cond ); .) 		  
+		  | IF(IsAssignment()) (. Exp* e = 0; .) Assignment<e> (. expression->statements.push_back( e ); .) 
+		  |  (. Exp* e = 0; .) EmbeddedStatement<e> (. expression->statements.push_back( e ); .)
+	
+	.
+
+END C.

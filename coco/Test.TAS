@@ -1,0 +1,31 @@
+void main()
+{	
+	/*
+	#optimize off
+	if( position.x > 2.14f || position.y < 2.14f )
+	{
+		position.x = 4;
+		la( position.x );
+	}
+		
+	test2(1 || position.x || 2, 2 && 2, 3 == 4, 4 + 1, 4 - 1, 5 * 1, 4);
+	sin( position.x );		
+	sin( -1.0f );
+	
+	#optimize on
+	cos( -0.4f );		
+	multiadd(1 + 2 + 3);
+	multisub( 5 + (4 - 2) * 6 / 2);
+	*/
+	
+	#optimize off
+	position.x = 0.4;
+	
+	if( position.x == 0.4 )
+	{
+		position.x = 0.8;
+		position.y = 0.12;
+	}		
+	
+	position.x = 0.4 + position.x + cos(position.x) % 0.1f;		
+}
