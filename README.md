@@ -1,7 +1,7 @@
 p.e.l
 =====
 
-Small interprented language geared towards expressing formualaes for particle emission properties. 
+Small interprented language geared towards expressing formualas for particle emission properties. 
 
 	void main()
 	{		
