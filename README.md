@@ -47,5 +47,12 @@ Small interprented language geared towards expressing formualas for particle emi
 		position.ceil = ceil(2.2f);
 		position.floor = floor(2.2f);
 		position.roundl = round(2.4899f);
-		position.roundh = round(2.5211f);		
+		position.roundh = round(2.5211f);
+		
+		// Built in random functions
+		position.rand1 = rand( 191, 595);
+		position.rand2 = rand( 191, 595);
+		position.rand3 = rand( 191, 595);
+		position.rand4 = rand( 191, 595);
+		position.rand5 = rand( 191, 595);		
 	}
