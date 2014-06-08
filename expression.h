@@ -335,7 +335,7 @@ public:
 				case e_lfld:
 					{
 						unsigned int i = il_decode_u32(v);
-						printf("load field\r\n");
+						printf("load field %f [%d]\r\n", locals[i], i);
 						stack.push(locals[i]);
 						v += 4;
 					}
@@ -344,7 +344,7 @@ public:
 					{
 						unsigned int i = il_decode_u32(v);
 						float a = stack.top(); stack.pop();
-						printf("store field\r\n");
+						printf("store field %f [%d]\r\n", a, i);
 						locals[i] = a;
 						v += 4;
 					}

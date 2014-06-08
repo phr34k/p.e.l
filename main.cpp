@@ -139,7 +139,7 @@ private:
 			std::string& d = variable;
 			if( s.compare(d) == 0)
 			{
-				v.il_lfld( 0 );
+				v.il_lfld( i );
 				fieldWasFound = true;
 			}
 		}
