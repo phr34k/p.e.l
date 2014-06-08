@@ -28,8 +28,24 @@ enum opcode
 	e_lfld,
 	e_sfld,
 
+	e_tan,
 	e_sin,
 	e_cos,
+	e_tanh,
+	e_sinh,
+	e_cosh,
+	e_atan,
+	e_asin,
+	e_acos,
+
+	e_clamp,
+	e_lerp,
+	e_smoothstep,
+	e_sqrt,
+	e_abs,
+	e_sign,
+	e_radians,
+	e_degrees,
 };
 
 class function;
@@ -192,6 +208,81 @@ public:
 	void il_cos()
 	{
 		il_add_bytecode_u8( e_cos );
+	}
+
+	void il_tan()
+	{
+		il_add_bytecode_u8( e_tan );
+	}
+
+	void il_sinh()
+	{
+		il_add_bytecode_u8( e_sinh );
+	}
+
+	void il_cosh()
+	{
+		il_add_bytecode_u8( e_cosh );
+	}
+
+	void il_tanh()
+	{
+		il_add_bytecode_u8( e_tanh );
+	}
+
+	void il_asin()
+	{
+		il_add_bytecode_u8( e_asin );
+	}
+
+	void il_acos()
+	{
+		il_add_bytecode_u8( e_acos );
+	}
+
+	void il_atan()
+	{
+		il_add_bytecode_u8( e_atan );
+	}
+
+	void il_lerp()
+	{
+		il_add_bytecode_u8( e_lerp );
+	}
+
+	void il_clamp()
+	{
+		il_add_bytecode_u8( e_clamp );
+	}
+
+	void il_sqrt()
+	{
+		il_add_bytecode_u8( e_sqrt );
+	}
+
+	void il_abs()
+	{
+		il_add_bytecode_u8( e_abs );
+	}
+
+	void il_sign()
+	{
+		il_add_bytecode_u8( e_sign );
+	}
+
+	void il_radians()
+	{
+		il_add_bytecode_u8( e_radians );
+	}
+
+	void il_degrees()
+	{
+		il_add_bytecode_u8( e_degrees );
+	}
+
+	void il_smoothstep()
+	{
+		il_add_bytecode_u8( e_smoothstep );
 	}
 
 	void il_pop()
@@ -374,6 +465,126 @@ public:
 						stack.push( sin(a) );
 					}
 					break;
+				case e_tan:
+					{
+						float a = stack.top(); stack.pop();
+						printf("tan %f\r\n", a);
+						stack.push( tan(a) );
+					}
+					break;	
+				case e_cosh:
+					{
+						float a = stack.top(); stack.pop();
+						printf("cosh %f\r\n", a);
+						stack.push( cosh(a) );
+					}
+					break;
+				case e_sinh:
+					{
+						float a = stack.top(); stack.pop();
+						printf("sinh %f\r\n", a);
+						stack.push( sinh(a) );
+					}
+					break;
+				case e_tanh:
+					{
+						float a = stack.top(); stack.pop();
+						printf("tanh %f\r\n", a);
+						stack.push( tanh(a) );
+					}
+					break;	
+				case e_acos:
+					{
+						float a = stack.top(); stack.pop();
+						printf("acos %f\r\n", a);
+						stack.push( acos(a) );
+					}
+					break;
+				case e_asin:
+					{
+						float a = stack.top(); stack.pop();
+						printf("asin %f\r\n", a);
+						stack.push( asin(a) );
+					}
+					break;
+				case e_atan:
+					{
+						float a = stack.top(); stack.pop();
+						printf("atan %f\r\n", a);
+						stack.push( atan(a) );
+					}
+					break;	
+				case e_lerp:
+					{
+						float c = stack.top(); stack.pop();
+						float b = stack.top(); stack.pop();
+						float a = stack.top(); stack.pop();
+						printf("lerp %f %f %f\r\n", a, b, c);
+						
+						float d = c > 1.0f ? 1.0f : ( c < 0.0f ? 0.0f : c );
+						stack.push( a + (b - a) * d );
+					}
+					break;
+				case e_clamp:
+					{
+						float c = stack.top(); stack.pop();
+						float b = stack.top(); stack.pop();
+						float a = stack.top(); stack.pop();
+						printf("clamp %f %f %f\r\n", a, b, c);
+						float d = c > b ? b : ( c < a ? a : c );
+						stack.push( d );
+					}
+					break;
+				case e_smoothstep:
+					{
+						float c = stack.top(); stack.pop();
+						float b = stack.top(); stack.pop();
+						float a = stack.top(); stack.pop();
+						printf("smoothstep %f %f %f\r\n", a, b, c);
+						
+						float r = (c - a) / (b - a);
+						float t = r > 1.0f ? 1.0f : ( r < 0.0f ? 0.0f : r );
+						stack.push( t * t * (3.0 - 2.0 * t) );
+					}
+					break;				
+				case e_sqrt:
+					{
+						float a = stack.top(); stack.pop();
+						printf("sqrt %f\r\n", a);					
+						stack.push( sqrt(a) );
+					}
+					break;
+				case e_abs:
+					{
+						float a = stack.top(); stack.pop();
+						printf("abs %f\r\n", a);					
+						stack.push( fabs(a) );
+					}
+					break;
+				case e_sign:
+					{
+						float a = stack.top(); stack.pop();
+						printf("sign %f\r\n", a);					
+						stack.push( a < 0 ? -1 : 1 );
+					}
+					break;
+				case e_radians:
+					{
+						float a = stack.top(); stack.pop();
+						printf("radians %f\r\n", a);					
+						stack.push( (3.14159265358979323846f * a) / 180.0f );
+					}
+					break;
+				case e_degrees:
+					{
+						float a = stack.top(); stack.pop();
+						printf("degrees %f\r\n", a);					
+						stack.push( (180 * a) / 3.14159265358979323846f );
+					}
+					break;
+
+					
+
 			}
 		}
 	}

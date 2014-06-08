@@ -28,4 +28,14 @@ void main()
 	}		
 	
 	position.x = 0.4 + position.x + cos(position.x) % 0.1f;		
+	
+	
+	position.clamp = clamp(0.0, 1.0, -3.0);
+	position.lerp = lerp(0.0, 2.0, 1.5);
+	position.sqrt = sqrt(100);
+	position.abs = abs(-300);	
+	position.sign = sign(-300);
+	
+	position.rad = radians(360);
+	position.deg = degrees(position.rad);
 }

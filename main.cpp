@@ -166,31 +166,88 @@ private:
 			visit(expression->arguments[0], v);
 			v.il_cos();
 		}
+		else if( expression->functionName == L"tan" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_tan();
+		}
+		else if( expression->functionName == L"sinh" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_sinh();
+		}
+		else if( expression->functionName == L"cosh" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_cosh();
+		}
+		else if( expression->functionName == L"tanh" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_tanh();
+		}
+		else if( expression->functionName == L"asin" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_asin();
+		}
+		else if( expression->functionName == L"acos" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_acos();
+		}
+		else if( expression->functionName == L"atan" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_atan();
+		}
 		else if( expression->functionName == L"lerp" )
 		{
 			visit(expression->arguments[0], v);
 			visit(expression->arguments[1], v);
 			visit(expression->arguments[2], v);
-			v.il_cos();
+			v.il_lerp();
 		}
 		else if( expression->functionName == L"smoothstep" )
 		{
 			visit(expression->arguments[0], v);
 			visit(expression->arguments[1], v);
 			visit(expression->arguments[2], v);
-			v.il_pop();
-			v.il_pop();
-			v.il_cos();
+			v.il_smoothstep();
 		}
 		else if( expression->functionName == L"clamp" )
 		{
 			visit(expression->arguments[0], v);
 			visit(expression->arguments[1], v);
 			visit(expression->arguments[2], v);
-			v.il_pop();
-			v.il_pop();
-			v.il_cos();
+			v.il_clamp();
 		}
+		else if( expression->functionName == L"sqrt" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_sqrt();
+		}
+		else if( expression->functionName == L"abs" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_abs();
+		}
+		else if( expression->functionName == L"sign" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_sign();
+		}
+		else if( expression->functionName == L"radians" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_radians();
+		}
+		else if( expression->functionName == L"degrees" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_degrees();
+		}
+
 	}
 
 
