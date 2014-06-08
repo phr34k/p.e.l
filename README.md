@@ -23,7 +23,19 @@ Small interprented language geared towards expressing formualas for particle emi
 		// Assignment expressions
 		position.x = 0.4 + position.x + cos(position.x) % 0.1f;		
 		
+		
 		// Built in trig functions
+		position.sin = sin(0.5);
+		position.cos = cos(0.5);
+		position.tan = tan(0.5);	
+		position.sinh = sinh(0.5);
+		position.cosh = cosh(0.5);
+		position.tanh = tanh(0.5);									
+		position.asin = asin(0.5);
+		position.acos = acos(0.5);
+		position.atan = atan(0.5);			
+		
+		// Built in math functions
 		position.clamp = clamp(0.0, 1.0, -3.0);
 		position.lerp = lerp(0.0, 2.0, 1.5);
 		position.smth = smoothstep(0.0, 2.0, 1.0);
