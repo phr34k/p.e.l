@@ -262,6 +262,12 @@ private:
 			visit(expression->arguments[0], v);
 			v.il_ceil();
 		}
+		else if( expression->functionName == L"rand" )
+		{
+			visit(expression->arguments[0], v);
+			visit(expression->arguments[1], v);
+			v.il_rand();
+		}
 
 
 	}

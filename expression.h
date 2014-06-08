@@ -51,6 +51,7 @@ enum opcode
 	e_ceil,
 	e_floor,
 	e_round,
+	e_rand,
 };
 
 class function;
@@ -324,6 +325,11 @@ public:
 	void il_pop()
 	{
 		il_add_bytecode_u8( e_store );
+	}
+
+	void il_rand()
+	{
+		il_add_bytecode_u8( e_rand );
 	}
 
 	void il_sfld(Local lbl)
@@ -736,6 +742,18 @@ public:
 						stack.push( a < 0.0 ? ceil(a - 0.5) : floor(a + 0.5) );
 					}
 					break;			
+				case e_rand:
+					{
+						float b = stack.top(); stack.pop();
+						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
+						printf("rand %f %f\r\n", a, b);					
+						#endif
+
+						double x = (double)rand()/(double)RAND_MAX * (b - a) + a;
+						stack.push( x );
+					}
+					break;	
 			}
 		}
 	}
