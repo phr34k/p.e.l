@@ -38,4 +38,8 @@ void main()
 	
 	position.rad = radians(120);
 	position.deg = degrees(position.rad);
+	position.ceil = ceil(2.2f);
+	position.floor = floor(2.2f);
+	position.roundl = round(2.4899f);
+	position.roundh = round(2.5211f);
 }

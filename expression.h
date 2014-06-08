@@ -46,6 +46,9 @@ enum opcode
 	e_sign,
 	e_radians,
 	e_degrees,
+	e_ceil,
+	e_floor,
+	e_round,
 };
 
 class function;
@@ -283,6 +286,21 @@ public:
 	void il_smoothstep()
 	{
 		il_add_bytecode_u8( e_smoothstep );
+	}
+
+	void il_floor()
+	{
+		il_add_bytecode_u8( e_floor );
+	}
+
+	void il_ceil()
+	{
+		il_add_bytecode_u8( e_ceil );
+	}
+
+	void il_round()
+	{
+		il_add_bytecode_u8( e_round );
 	}
 
 	void il_pop()
@@ -583,8 +601,27 @@ public:
 					}
 					break;
 
-					
-
+				case e_ceil:
+					{
+						float a = stack.top(); stack.pop();
+						printf("ceil %f\r\n", a);					
+						stack.push( ceil(a) );
+					}
+					break;
+				case e_floor:
+					{
+						float a = stack.top(); stack.pop();
+						printf("floor %f\r\n", a);					
+						stack.push( floor(a) );
+					}
+					break;
+				case e_round:
+					{
+						float a = stack.top(); stack.pop();
+						printf("round %f\r\n", a);					
+						stack.push( a < 0.0 ? ceil(a - 0.5) : floor(a + 0.5) );
+					}
+					break;			
 			}
 		}
 	}

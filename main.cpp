@@ -247,6 +247,22 @@ private:
 			visit(expression->arguments[0], v);
 			v.il_degrees();
 		}
+		else if( expression->functionName == L"round" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_round();
+		}
+		else if( expression->functionName == L"floor" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_floor();
+		}
+		else if( expression->functionName == L"ceil" )
+		{
+			visit(expression->arguments[0], v);
+			v.il_ceil();
+		}
+
 
 	}
 
