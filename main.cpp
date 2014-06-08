@@ -304,10 +304,6 @@ private:
 			/*
 			case 1: printft(indent, "==\r\n"); break;
 			case 2: printft(indent, "!=\r\n"); break;									
-			case 3: printft(indent, "<=\r\n"); break;
-			case 4: printft(indent, ">=\r\n"); break;
-			case 5: printft(indent, "<\r\n"); break;
-			case 6: printft(indent, ">\r\n"); break;
 			*/
 
 			if( expression->op == 1 )
@@ -344,6 +340,88 @@ private:
 					jmp[expression] = v.il_neq( 0 );
 				}
 			}
+
+			/*
+			case 3: printft(indent, "<=\r\n"); break;
+			case 4: printft(indent, ">=\r\n"); break;
+			case 5: printft(indent, "<\r\n"); break;
+			case 6: printft(indent, ">\r\n"); break;
+			*/
+
+
+			else if( expression->op == 3 )
+			{
+				if( operatorStack.top() == true )
+				{
+					//First expression
+					visit(expression->a, v, x);
+					visit(expression->b, v, x);
+					jmp[expression] = v.il_gt( 0 );
+				}
+				else
+				{
+					//First expression
+					visit(expression->a, v, x);
+					visit(expression->b, v, x);
+					jmp[expression] = v.il_elt( 0 );
+				}
+			}
+			else if( expression->op == 4 )
+			{
+				if( operatorStack.top() == true )
+				{
+					//First expression
+					visit(expression->a, v, x);
+					visit(expression->b, v, x);
+					jmp[expression] = v.il_lt( 0 );
+				}
+				else
+				{
+					//First expression
+					visit(expression->a, v, x);
+					visit(expression->b, v, x);
+					jmp[expression] = v.il_egt( 0 );
+				}
+			}
+
+
+			else if( expression->op == 5 )
+			{
+				if( operatorStack.top() == true )
+				{
+					//First expression
+					visit(expression->a, v, x);
+					visit(expression->b, v, x);
+					jmp[expression] = v.il_egt( 0 );
+				}
+				else
+				{
+					//First expression
+					visit(expression->a, v, x);
+					visit(expression->b, v, x);
+					jmp[expression] = v.il_lt( 0 );
+				}
+			}
+			else if( expression->op == 6 )
+			{
+				if( operatorStack.top() == true )
+				{
+					//First expression
+					visit(expression->a, v, x);
+					visit(expression->b, v, x);
+					jmp[expression] = v.il_elt( 0 );
+				}
+				else
+				{
+					//First expression
+					visit(expression->a, v, x);
+					visit(expression->b, v, x);
+					jmp[expression] = v.il_gt( 0 );
+				}
+			}
+		
+
+
 		}
 		else
 		{

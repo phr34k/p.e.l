@@ -172,6 +172,245 @@ struct CallExpr : Exp
 			}
 		}		
 		
+		if( functionName == L"tan" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = tan(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}	
+		
+		if( functionName == L"sinh" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = sinh(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}
+
+		if( functionName == L"cosh" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = cosh(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}		
+		
+		if( functionName == L"tanh" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = tanh(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}	
+		
+		if( functionName == L"asin" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = asin(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}
+
+		if( functionName == L"acos" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = acos(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}		
+		
+		if( functionName == L"atan" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = atan(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}	
+		
+		if( functionName == L"sqrt" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = sqrt(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}							
+		
+		if( functionName == L"abs" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = fabs(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}	
+		
+		if( functionName == L"sign" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = literal_a->literal < 0 ? -1 : 1;
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}	
+
+		if( functionName == L"radians" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = (3.14159265358979323846f * literal_a->literal) / 180.0f;
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}		
+		
+		if( functionName == L"degrees" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = (180 * literal_a->literal) / 3.14159265358979323846f;
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}			
+		
+		if( functionName == L"ceil" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = ceil(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}		
+		
+		if( functionName == L"floor" && arguments.size() == 1 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			if( literal_a != 0 && canOptimize == true )
+			{
+				float result = floor(literal_a->literal);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}		
+		
+		if( functionName == L"clamp" && arguments.size() == 3 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			LiteralExpr* literal_b = dynamic_cast<LiteralExpr*>(arguments[1]);
+			LiteralExpr* literal_c = dynamic_cast<LiteralExpr*>(arguments[2]);
+			if( literal_a != 0 && literal_b != 0 && literal_c != 0 && canOptimize == true )
+			{
+				float a = literal_a->literal;
+				float b = literal_b->literal;
+				float c = literal_c->literal;
+				float result = c > b ? b : ( c < a ? a : c );
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}
+		
+		if( functionName == L"lerp" && arguments.size() == 3 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			LiteralExpr* literal_b = dynamic_cast<LiteralExpr*>(arguments[1]);
+			LiteralExpr* literal_c = dynamic_cast<LiteralExpr*>(arguments[2]);
+			if( literal_a != 0 && literal_b != 0 && literal_c != 0 && canOptimize == true )
+			{
+				float a = literal_a->literal;
+				float b = literal_b->literal;
+				float c = literal_c->literal;
+				float result = c > 1.0f ? 1.0f : ( c < 0.0f ? 0.0f : c );
+					  result = a + (b - a) * result;
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}				
+		
+		if( functionName == L"smoothstep" && arguments.size() == 3 )
+		{
+			LiteralExpr* literal_a = dynamic_cast<LiteralExpr*>(arguments[0]);
+			LiteralExpr* literal_b = dynamic_cast<LiteralExpr*>(arguments[1]);
+			LiteralExpr* literal_c = dynamic_cast<LiteralExpr*>(arguments[2]);
+			if( literal_a != 0 && literal_b != 0 && literal_c != 0 && canOptimize == true )
+			{
+				float a = literal_a->literal;
+				float b = literal_b->literal;
+				float c = literal_c->literal;
+				float result = (c - a) / (b - a);
+					  result = result > 1.0f ? 1.0f : ( result < 0.0f ? 0.0f : result );
+					  result = result * result * (3.0 - 2.0 * result);
+				LiteralExpr* r = new LiteralExpr();
+				r->literal = result;
+				r->canOptimize = true;
+				return r;			
+			}
+		}		
+		
 		return 0;
 	}
 };

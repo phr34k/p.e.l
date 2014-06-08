@@ -23,6 +23,8 @@ enum opcode
 	e_eq,
 	e_lt,
 	e_gt,
+	e_elt,
+	e_egt,
 	e_neq,
 	
 	e_lfld,
@@ -159,6 +161,22 @@ public:
 	Label il_lt(Label lbl)
 	{
 		il_add_bytecode_u8( e_lt );
+		Label l = il_get_label();
+		il_add_bytecode_u32( lbl );
+		return l;
+	}
+
+	Label il_egt(Label lbl)
+	{
+		il_add_bytecode_u8( e_egt );
+		Label l = il_get_label();
+		il_add_bytecode_u32( lbl );
+		return l;
+	}
+
+	Label il_elt(Label lbl)
+	{
+		il_add_bytecode_u8( e_elt );
 		Label l = il_get_label();
 		il_add_bytecode_u32( lbl );
 		return l;
@@ -334,26 +352,34 @@ public:
 			switch( *(v++) ) 
 			{
 				case e_ret:
+					#ifndef NDEBUG
 					printf("return function\r\n");
+					#endif
 					return;				
 				case e_load:
 					{
 						float i = il_decode_flt(v);
 						stack.push(i);
+						#ifndef NDEBUG
 						printf("load stack %f\r\n", i);
+						#endif
 						v += 4;
 					}
 					break;
 				case e_store:
 					{
 						stack.pop();
+						#ifndef NDEBUG
 						printf("store stack\r\n");
+						#endif 
 					}
 					break;
 				case e_lfld:
 					{
 						unsigned int i = il_decode_u32(v);
+						#ifndef NDEBUG
 						printf("load field %f [%d]\r\n", locals[i], i);
+						#endif
 						stack.push(locals[i]);
 						v += 4;
 					}
@@ -362,7 +388,9 @@ public:
 					{
 						unsigned int i = il_decode_u32(v);
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("store field %f [%d]\r\n", a, i);
+						#endif
 						locals[i] = a;
 						v += 4;
 					}
@@ -372,7 +400,9 @@ public:
 						float a = stack.top(); stack.pop();
 						float b = stack.top(); stack.pop();
 						stack.push( a + b );
+						#ifndef NDEBUG
 						printf("add %f\r\n", a + b);
+						#endif
 					}
 					break;
 				case e_sub:
@@ -380,7 +410,9 @@ public:
 						float a = stack.top(); stack.pop();
 						float b = stack.top(); stack.pop();
 						stack.push( a - b );
+						#ifndef NDEBUG
 						printf("add %f\r\n", a - b);
+						#endif
 					}
 					break;
 				case e_mul:
@@ -388,7 +420,9 @@ public:
 						float a = stack.top(); stack.pop();
 						float b = stack.top(); stack.pop();
 						stack.push( a * b );
+						#ifndef NDEBUG
 						printf("add %f\r\n", a * b);
+						#endif
 					}
 					break;
 				case e_div:
@@ -404,14 +438,18 @@ public:
 						float b = stack.top(); stack.pop();
 						float a = stack.top(); stack.pop();
 						stack.push( fmodf(a, b) );
+						#ifndef NDEBUG
 						printf("mod %f %f %f\r\n", a, b, fmodf(a, b) );
+						#endif
 					}
 					break;
 
 				case e_jmp:
 					{
 						unsigned int i = il_decode_u32(v);
+						#ifndef NDEBUG
 						printf("jmp\r\n");
+						#endif
 						v = &bytecode[i];
 					}
 					break;
@@ -421,7 +459,9 @@ public:
 						unsigned int i = il_decode_u32(v);
 						float a = stack.top(); stack.pop();
 						float b = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("eq %f %f == %d\r\n", a, b, a == b);
+						#endif
 						if( a == b ) {
 							v = &bytecode[i];
 						} else {
@@ -434,8 +474,10 @@ public:
 						unsigned int i = il_decode_u32(v);
 						float a = stack.top(); stack.pop();
 						float b = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("lt %f %f == %d\r\n", a, b, a <= b);
-						if( a <= b ) {
+						#endif
+						if( a < b ) {
 							v = &bytecode[i];
 						} else {
 							v += 4;
@@ -447,7 +489,39 @@ public:
 						unsigned int i = il_decode_u32(v);
 						float a = stack.top(); stack.pop();
 						float b = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("gt %f %f == %d\r\n", a, b, a >= b);
+						#endif
+						if( a > b ) {
+							v = &bytecode[i];
+						} else {
+							v += 4;
+						}
+					}
+					break;
+				case e_elt:
+					{
+						unsigned int i = il_decode_u32(v);
+						float a = stack.top(); stack.pop();
+						float b = stack.top(); stack.pop();
+						#ifndef NDEBUG
+						printf("lt %f %f == %d\r\n", a, b, a <= b);
+						#endif
+						if( a <= b ) {
+							v = &bytecode[i];
+						} else {
+							v += 4;
+						}
+					}
+					break;
+				case e_egt:
+					{
+						unsigned int i = il_decode_u32(v);
+						float a = stack.top(); stack.pop();
+						float b = stack.top(); stack.pop();
+						#ifndef NDEBUG
+						printf("gt %f %f == %d\r\n", a, b, a >= b);
+						#endif
 						if( a >= b ) {
 							v = &bytecode[i];
 						} else {
@@ -460,7 +534,9 @@ public:
 						unsigned int i = il_decode_u32(v);
 						float a = stack.top(); stack.pop();
 						float b = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("neq %f %f != %d\r\n", a, b, a != b);
+						#endif
 						if( a != b ) {
 							printf("\t jmp %d\r\n", i);
 							v = &bytecode[i];
@@ -472,21 +548,27 @@ public:
 				case e_cos:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("cos %f\r\n", a);
+						#endif
 						stack.push( cos(a) );
 					}
 					break;
 				case e_sin:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("sin %f\r\n", a);
+						#endif
 						stack.push( sin(a) );
 					}
 					break;
 				case e_tan:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("tan %f\r\n", a);
+						#endif
 						stack.push( tan(a) );
 					}
 					break;	
@@ -500,35 +582,45 @@ public:
 				case e_sinh:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("sinh %f\r\n", a);
+						#endif
 						stack.push( sinh(a) );
 					}
 					break;
 				case e_tanh:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("tanh %f\r\n", a);
+						#endif
 						stack.push( tanh(a) );
 					}
 					break;	
 				case e_acos:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("acos %f\r\n", a);
+						#endif
 						stack.push( acos(a) );
 					}
 					break;
 				case e_asin:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("asin %f\r\n", a);
+						#endif
 						stack.push( asin(a) );
 					}
 					break;
 				case e_atan:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("atan %f\r\n", a);
+						#endif
 						stack.push( atan(a) );
 					}
 					break;	
@@ -537,7 +629,9 @@ public:
 						float c = stack.top(); stack.pop();
 						float b = stack.top(); stack.pop();
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("lerp %f %f %f\r\n", a, b, c);
+						#endif	
 						
 						float d = c > 1.0f ? 1.0f : ( c < 0.0f ? 0.0f : c );
 						stack.push( a + (b - a) * d );
@@ -548,7 +642,9 @@ public:
 						float c = stack.top(); stack.pop();
 						float b = stack.top(); stack.pop();
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("clamp %f %f %f\r\n", a, b, c);
+						#endif
 						float d = c > b ? b : ( c < a ? a : c );
 						stack.push( d );
 					}
@@ -558,7 +654,9 @@ public:
 						float c = stack.top(); stack.pop();
 						float b = stack.top(); stack.pop();
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("smoothstep %f %f %f\r\n", a, b, c);
+						#endif
 						
 						float r = (c - a) / (b - a);
 						float t = r > 1.0f ? 1.0f : ( r < 0.0f ? 0.0f : r );
@@ -568,35 +666,45 @@ public:
 				case e_sqrt:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("sqrt %f\r\n", a);					
+						#endif
 						stack.push( sqrt(a) );
 					}
 					break;
 				case e_abs:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("abs %f\r\n", a);					
+						#endif
 						stack.push( fabs(a) );
 					}
 					break;
 				case e_sign:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("sign %f\r\n", a);					
+						#endif
 						stack.push( a < 0 ? -1 : 1 );
 					}
 					break;
 				case e_radians:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("radians %f\r\n", a);					
+						#endif
 						stack.push( (3.14159265358979323846f * a) / 180.0f );
 					}
 					break;
 				case e_degrees:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("degrees %f\r\n", a);					
+						#endif
 						stack.push( (180 * a) / 3.14159265358979323846f );
 					}
 					break;
@@ -604,21 +712,27 @@ public:
 				case e_ceil:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("ceil %f\r\n", a);					
+						#endif
 						stack.push( ceil(a) );
 					}
 					break;
 				case e_floor:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("floor %f\r\n", a);					
+						#endif
 						stack.push( floor(a) );
 					}
 					break;
 				case e_round:
 					{
 						float a = stack.top(); stack.pop();
+						#ifndef NDEBUG
 						printf("round %f\r\n", a);					
+						#endif
 						stack.push( a < 0.0 ? ceil(a - 0.5) : floor(a + 0.5) );
 					}
 					break;			
